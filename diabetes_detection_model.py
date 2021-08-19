@@ -103,6 +103,7 @@ my_metrics = [
 ]
 
 #creating model
+# sequential model -> 16 neurons:relu, dropout:0.2, 16 neurons:relu, 8 neurons: relu, 1 neuron:sigmoid
 model=tf.keras.Sequential([
                            tf.keras.layers.Dense(16,input_shape=[len(x_train.keys())],activation="relu"),
                            tf.keras.layers.Dropout(dropout_val),
@@ -111,7 +112,7 @@ model=tf.keras.Sequential([
                            tf.keras.layers.Dense(1,activation="sigmoid")
 ])
 
-#compiling the model
+#compiling the model -> rmsprop, binary_cross_entropy
 model.compile(optimizer=tf.keras.optimizers.RMSprop(learning_rate=lr,momentum=momentum_val),
                 loss=tf.keras.losses.BinaryCrossentropy(),
                 metrics=my_metrics)
@@ -120,14 +121,17 @@ model.compile(optimizer=tf.keras.optimizers.RMSprop(learning_rate=lr,momentum=mo
 model.summary()
 
 #training the model
+# callback for early stopping
 history = model.fit(x=x_train, y=y_train, batch_size=batch_size,epochs=epochs, shuffle=shuffle,callbacks=[callback])
 
 #save model to load it later
+# .h5 file format saves network structure along with weights, biases and hyperparameters for each layer
 model.save("my_model.h5")
 
 #evaluate model against unseen data i.e. test set
 model.evaluate(x = x_test, y = y_test, batch_size=batch_size)
 
+# for plotting and observing learning curves
 epochs = history.epoch
 hist = pd.DataFrame(history.history)
 
@@ -147,7 +151,7 @@ def plot_curve(epochs, hist, list_of_metrics,name_of_plot,legend_pos):
   plt.savefig("{}.png".format(name_of_plot),dpi=300,bbox_inches="tight")
   plt.show()
 
-#graph for accuracy, precision and recall, recall being important parameter for diabetes detection
+#graph for accuracy, precision and recall, recall being important parameter for diabetes detection, just accuracy is not effective
 list_of_metrics_to_plot = ['accuracy', "precision", "recall"]
 plot_curve(epochs, hist, list_of_metrics_to_plot,"Accuracy, precision and recall","lower right")
 
